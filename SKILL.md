@@ -848,21 +848,35 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 95. zip 包里套 zip（递归嵌套）→ 移除内层 zip
 96. register() 中初始化 logger / print → 移除或改为偏好设置（默认关闭）
 
-### 最近一个月补充
+### 2026-6.1补充2026-6.1
 - 描述里别放安装指南
 - 包里只留真正会被扩展用到的文件，图片和其他无关文件都删掉
-- lender_manifest 里的 tag 翻成英文，用户可见字符串默认也要是英文
+- lender_manifest 里的 tag 翻成英文，用户可见字符串默认也要是英文
 - 偏好和包名相关访问继续用 __package__，不要用 __name__
 - 只靠 purge_unused_data 之类的清理动作不行，用户得知道你在动他们的数据
 - platforms 没必要就别写
 - 功能太窄的个人工具箱，别硬塞进平台
 - 节点类扩展要真正覆盖整个 node tree，不要只在一部分节点上能用
-- 兼容性不行就补版本支持，或者在 lender_manifest 里把 max_version 限住
+- 兼容性不行就补版本支持，或者在 lender_manifest 里把 max_version 限住
 - 如果这类功能 Blender 里已经有现成方案，就先想想是不是该直接用内置方案
 
-## 官方扩展平台文档速查
+- `sys.modules` / `sys.path` 不能只挪进 `except` 里，整套兜底都要删干净
+- 背景渲染不能因为导入失败就继续靠路径注入撑着；如果结构不适合后台渲染，就换成正常的同进程导入
+- 不要再保留递归式的自调用入口或“导入自己再执行自己”的 worker 结构
+- 调用 Blender 的 Python 子进程时，优先考虑 `subprocess.check_call([sys.executable, *bpy.app.python_args, path_to_script])`，别让环境跑偏
+- 如果一段流程其实只靠 `OpenImageIO` 和 `numpy` 就能在主进程完成，那就直接做成进程内调用，别再引入 `subprocess`、`sys.executable` 或额外 Blender 进程
 
-### 创建扩展（Getting Started）
+- `Awaiting Changes` 里常见的是删掉不被接受的结构，不要把问题挪进 `except` 里继续保留同一套路。
+- `Awaiting Changes` 里如果被点名背景渲染、递归 worker 或 `sys.path`，通常就是要把这条路径整条删掉。
+- `Awaiting Review` 一般表示作者已经回改，回复里要简短说明“改了什么”。
+- `Approved` 只说明当前反馈链路已经过了，别把它当成继续保留技术债的许可。
+- `Rejected` 如果出现，先停住，别只修表面再重提。
+- 只要主进程能靠 `OpenImageIO` 和 `numpy` 做完，就别再引入 `subprocess`、`sys.executable` 或额外 Blender 进程。
+- 如果扩展要和外部软件联动，先看是不是违反“不得连接或依赖第三方软件”的平台边界。
+- 纯文件桥、无端口、无服务器的桌面同步方案比起网络服务更容易过审，但仍要说明它为什么不算第三方依赖。
+- 需要文件读写的扩展要把权限边界说清楚，尤其是导出 FBX、读写纹理、写本地配置这类动作。
+- 复杂工具箱式扩展如果只是把很多独立功能堆在一起，没有清晰主线，通常会被当成“过宽、过散”。
+- Blender 扩展里能直接用的能力优先内置，不要为了一个工具链再包一层自己维护的桥。
 
 ```
 blender --command extension build
@@ -1118,3 +1132,4 @@ blender --command extension build --split-platforms
 - Blender UI 内不允许商业/捐赠链接、购买提示等广告
 - 描述中允许链接到外部资助平台，但不得有功能限制（注册/付费/密钥）
 - 展示本平台未包含的商业版本功能将被视为广告，不允许
+
