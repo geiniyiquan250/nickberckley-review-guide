@@ -878,6 +878,22 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 - 复杂工具箱式扩展如果只是把很多独立功能堆在一起，没有清晰主线，通常会被当成“过宽、过散”。
 - Blender 扩展里能直接用的能力优先内置，不要为了一个工具链再包一层自己维护的桥。
 
+### 2026-6.24补充
+- 以前 `Approved` 的扩展，后续版本带回违规内容，还是要打回。
+- `Awaiting Changes` 只认删结构，不认补兜底。不要把问题塞进 `except`、`try` 或其他 fallback 里继续留着。
+- `threading` / `queue` 不允许，改用 `subprocess` 或别的主进程方案。
+- `exec` / `eval` 不允许。
+- 手动改 `sys` 模块不允许。
+- 用 `__name__` 访问扩展偏好不允许，必须用 `__package__`。
+- `ensure_directory`、`send_os_notification` 这类 OS 层动作不允许。
+- 依赖或访问其他扩展不允许。
+- `C++` 库不允许。
+- 包里留 `Claude.md` 这类开发文件不行。
+- 标题里不能带 `Blender`。
+- 功能要有清晰主题，个人工具箱式的大杂烩不行。
+- `Declined` 通常表示功能定位或平台边界不对，不是补几条小问题就能过。
+- 回打修改先把导入/重载、偏好访问、公开报错入口改对，再上传新版本。
+
 ```
 blender --command extension build
 ```
