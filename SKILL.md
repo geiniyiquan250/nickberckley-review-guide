@@ -282,10 +282,11 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 - 更不允许未经用户同意连接互联网检查更新
 
 ### 禁止广告
-- Blender UI 中不允许出现广告
+- Blender UI 中不允许出现商业、捐赠链接、购买提示等广告
+- 不允许嵌入捐赠链接作为推广
 - 描述中的视频和图片应只展示当前版本包含的功能
 - 不支持"PRO版"功能限制（如3次限制等），扩展应功能完整
-- 不允许嵌入捐赠链接作为推广
+- 描述中允许链接到外部资助平台，但不得有功能限制（注册/付费/密钥）
 
 ### 禁止商标滥用
 - Blender 标志是注册商标，不可在扩展图片或宣传材料中使用
@@ -327,13 +328,17 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 - 可以在网站编辑界面修改（Support字段），或在 `blender_manifest` 中添加 `support` URL 字段
 - `website` 字段可以保留为项目主页
 
-### 标签（Tags）
-- 标签必须与扩展功能相关，不能堆砌不相关标签
-- 只保留最相关的1-2个标签
-- 例如：纯添加骨骼的扩展不应加 `Animation` 标签
+### Tags
+- 只保留最相关的 1-2 个标签，删除无关或多余的标签
+- 标签必须与扩展核心功能严格相关，不能堆砌不相关标签来获取更多曝光
+- 例如：纯添加骨骼的扩展不应加 `Animation` 标签，纯顶点组工具不应加 `Paint` 标签
+- 已有案例：BoneSelector（`Paint` 与 Weight Painting 无关）、VGF（`Animation` 无关）、Missing File Rescuer（`Import-Export`/`Pipeline` 无关）、DMX（新增无关 tags 被要求移除——"Do not abuse our tags system"）
+- tag 选择上，`Add Mesh` 比 `Mesh` 更精准：PTerrain 被建议使用 `Add Mesh`
 
 ### platforms 字段
-- `platforms` 字段应从 `blender_manifest` 中完全移除
+- 跨平台扩展：`platforms` 字段应从 `blender_manifest` 中完全移除（默认支持所有平台）
+- 平台专有的扩展（如仅 Windows 可用）：必须在 manifest 中声明 `platforms` 限制，例如 `platforms = ["windows-x64"]`
+- 已有案例：Missing File Rescuer 只检查 Windows 驱动器路径，被要求限制 platforms
 
 ### 所有文本必须为英文
 - `blender_manifest` 中的所有内容必须是英文
@@ -703,20 +708,12 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 ## 内容与描述规范
 
 ### 描述
-- 移除描述中的安装指南（用户应该从平台安装，额外指南会让用户困惑并导致错误安装）
+- 移除描述中的安装指南。平台上的所有扩展安装方式相同，额外指南会让用户困惑并导致错误安装方式
 - 描述中的视频和图片应只展示 Lite/当前版本包含的功能
 - 如果扩展有付费版本，描述中的视频不应展示付费版功能
 - 不允许在描述中嵌入过重的 GIF 或视频
 - 描述中不应包含需要跳转到外部网站的渲染动画通知
 - **避免使用 ChatGPT/AI 生成的描述**——审核员明确表示 AI 生成的描述很 off-putting（令人反感）
-
-### Tags
-- 只保留最相关的标签，删除多余标签
-
-### 许可证
-- 只允许分发 CC-0 许可的资源，用户应可自由使用和分发且无需署名
-- **CC-BY 不允许**——要求署名的许可不符合平台政策
-- AI 生成的内容或模型同样必须是 CC-0，不能对用户施加额外许可或署名要求
 
 ### Theme 版本兼容性
 - Blender 4.2–4.5 的主题与 Blender 5.0+ 的主题不兼容
@@ -745,10 +742,7 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 - 不得展示付费版本的独占功能
 - GIF 不应过重，避免页面加载缓慢
 
-### 安装指南
-- 不要包含安装指南，平台上的所有扩展安装方式相同
-- 额外指南会让用户困惑并导致错误的安装方式
-
+### Support/Report Issues
 ## 常见拒绝/退回理由 Quick Check
 
 1. `threading` / `queue` 模块 → 改用 `subprocess` / `multiprocess`
@@ -848,51 +842,9 @@ nickberckley 对 AI 生成的扩展代码非常敏感，有自己一套判断和
 95. zip 包里套 zip（递归嵌套）→ 移除内层 zip
 96. register() 中初始化 logger / print → 移除或改为偏好设置（默认关闭）
 
-### 2026-6.1补充2026-6.1
-- 描述里别放安装指南
-- 包里只留真正会被扩展用到的文件，图片和其他无关文件都删掉
-- lender_manifest 里的 tag 翻成英文，用户可见字符串默认也要是英文
-- 偏好和包名相关访问继续用 __package__，不要用 __name__
-- 只靠 purge_unused_data 之类的清理动作不行，用户得知道你在动他们的数据
-- platforms 没必要就别写
-- 功能太窄的个人工具箱，别硬塞进平台
-- 节点类扩展要真正覆盖整个 node tree，不要只在一部分节点上能用
-- 兼容性不行就补版本支持，或者在 lender_manifest 里把 max_version 限住
-- 如果这类功能 Blender 里已经有现成方案，就先想想是不是该直接用内置方案
+## 官方扩展平台文档速查
 
-- `sys.modules` / `sys.path` 不能只挪进 `except` 里，整套兜底都要删干净
-- 背景渲染不能因为导入失败就继续靠路径注入撑着；如果结构不适合后台渲染，就换成正常的同进程导入
-- 不要再保留递归式的自调用入口或“导入自己再执行自己”的 worker 结构
-- 调用 Blender 的 Python 子进程时，优先考虑 `subprocess.check_call([sys.executable, *bpy.app.python_args, path_to_script])`，别让环境跑偏
-- 如果一段流程其实只靠 `OpenImageIO` 和 `numpy` 就能在主进程完成，那就直接做成进程内调用，别再引入 `subprocess`、`sys.executable` 或额外 Blender 进程
-
-- `Awaiting Changes` 里常见的是删掉不被接受的结构，不要把问题挪进 `except` 里继续保留同一套路。
-- `Awaiting Changes` 里如果被点名背景渲染、递归 worker 或 `sys.path`，通常就是要把这条路径整条删掉。
-- `Awaiting Review` 一般表示作者已经回改，回复里要简短说明“改了什么”。
-- `Approved` 只说明当前反馈链路已经过了，别把它当成继续保留技术债的许可。
-- `Rejected` 如果出现，先停住，别只修表面再重提。
-- 只要主进程能靠 `OpenImageIO` 和 `numpy` 做完，就别再引入 `subprocess`、`sys.executable` 或额外 Blender 进程。
-- 如果扩展要和外部软件联动，先看是不是违反“不得连接或依赖第三方软件”的平台边界。
-- 纯文件桥、无端口、无服务器的桌面同步方案比起网络服务更容易过审，但仍要说明它为什么不算第三方依赖。
-- 需要文件读写的扩展要把权限边界说清楚，尤其是导出 FBX、读写纹理、写本地配置这类动作。
-- 复杂工具箱式扩展如果只是把很多独立功能堆在一起，没有清晰主线，通常会被当成“过宽、过散”。
-- Blender 扩展里能直接用的能力优先内置，不要为了一个工具链再包一层自己维护的桥。
-
-### 2026-6.24补充
-- 以前 `Approved` 的扩展，后续版本带回违规内容，还是要打回。
-- `Awaiting Changes` 只认删结构，不认补兜底。不要把问题塞进 `except`、`try` 或其他 fallback 里继续留着。
-- `threading` / `queue` 不允许，改用 `subprocess` 或别的主进程方案。
-- `exec` / `eval` 不允许。
-- 手动改 `sys` 模块不允许。
-- 用 `__name__` 访问扩展偏好不允许，必须用 `__package__`。
-- `ensure_directory`、`send_os_notification` 这类 OS 层动作不允许。
-- 依赖或访问其他扩展不允许。
-- `C++` 库不允许。
-- 包里留 `Claude.md` 这类开发文件不行。
-- 标题里不能带 `Blender`。
-- 功能要有清晰主题，个人工具箱式的大杂烩不行。
-- `Declined` 通常表示功能定位或平台边界不对，不是补几条小问题就能过。
-- 回打修改先把导入/重载、偏好访问、公开报错入口改对，再上传新版本。
+### 创建扩展（Getting Started）
 
 ```
 blender --command extension build
@@ -987,7 +939,9 @@ Dark、Light、Colorful、Inspired By、Print、Accessibility、High Contrast
 
 - **Add-ons**：必须使用 `SPDX:GPL-3.0-or-later`
 - **Themes**：推荐 GPL 3.0+，兼容 GPL 的许可证也可
-- **资源/素材**：必须使用 `SPDX:CC0-1.0`
+- **资源/素材**：必须使用 `SPDX:CC0-1.0`。用户应可自由使用和分发且无需署名
+- **CC-BY 不允许**——要求署名的许可不符合平台政策
+- AI 生成的内容或模型同样必须是 CC-0，不能对用户施加额外许可或署名要求
 - 仅支持自由开源许可证，遵循 Blender 自身许可
 
 ### 权限声明（Permissions）
@@ -1110,17 +1064,13 @@ blender --command extension build --split-platforms
 
 ## 服务条款（Terms of Service）要点
 
-### (1) 许可证
-- Add-ons 必须完全遵循 GPL 3.0 或更高版本
-- Theme 等其他扩展必须与 GPL 3.0+ 兼容
-
-### (2) 品牌规范
+### (1) 品牌规范
 - **名称**：扩展名称中不得包含 "Blender" 一词
 - **Logo**：缩略图、图标、预览图中不得使用 Blender 标志
 - **误导**：不得暗示扩展由 Blender 官方支持、认可或有关联
 - **第三方商标**：使用第三方软件/公司的标志需符合其品牌指南并提供证明
 
-### (3) 扩展内容
+### (2) 扩展内容
 - **无意外**：描述必须清晰易读，完整说明功能，用户安装后不应遇到未预期的功能
 - **合法**：不得违法
 - **功能完整**：扩展应是功能完整、有文档、积极维护的产品
@@ -1132,7 +1082,7 @@ blender --command extension build --split-platforms
 - **Fork**：名称必须与原作明显区分，需提供实质性功能/代码差异，必须注明作者和版权人
 - **无付费墙**：扩展不应要求购买额外内容才能使用
 
-### (4) 网络连接
+### (3) 网络连接
 - 必须声明 `network` 权限并说明原因
 - 必须遵守 `bpy.app.online_access` 偏好设置
 - 连接外部服务应无需额外限制（登录/注册）
@@ -1140,12 +1090,96 @@ blender --command extension build --split-platforms
 - 在 Blender 内打开浏览器的按钮不需要网络权限
 - 未经用户授权不得发送数据到远程地址
 
-### (5) 第三方应用
+### (4) 第三方应用
 - 必须自包含，不得加载远程代码执行
 - 不应需要从别处下载外部功能组件
 
-### (6) 广告
-- Blender UI 内不允许商业/捐赠链接、购买提示等广告
-- 描述中允许链接到外部资助平台，但不得有功能限制（注册/付费/密钥）
-- 展示本平台未包含的商业版本功能将被视为广告，不允许
+### 2026-6.29 更新（基于本周审核队列动态）
 
+基于 2026.6.22-6.28 期间 nickberckley 在审批队列中的最新审核反馈整理。
+
+#### 新发现 / 补充的禁止项
+
+**Report Issues 不能指向销售/推广页面**
+- 指向 Gumroad 等销售/推广页面不符合要求。Report Issues 必须指向用户可以公开提交 Bug 的地方（Git issues、Blender 论坛帖子等）
+- 已有案例：Alert!!AutoKeyingIsOn 的 Report Issues 指向了 Gumroad 页面，被要求改为公开 bug tracker
+
+**自定义 reload_addon 操作符不允许**
+- 自定义的 `reload_addon` 操作符不允许存在。扩展重载应使用 Blender 内置的 "Reload Scripts" 操作符
+- 已有案例：DMX 扩展被要求删除 `dmx.reload_addon`——"Add-ons can be reloaded with Blenders Reload Scripts operator"
+
+**自定义 keymap 捕获/注册包装逻辑不允许**
+- 不要用自定义函数来捕获、清理、或包装 keymap 注册逻辑。直接在 register/unregister 中注册 keymap，让用户通过 Blender 偏好设置自行修改快捷键
+- 已有案例：BoneSelector 被要求"remove everything related to how you catch and register custom keymaps. Simply register it"
+
+**Tag 滥用禁止（明确语气）**
+- 不能用无关 tags 为扩展获取更多曝光。tag 必须与扩展核心功能严格相关
+- 已有案例：DMX 被要求移除新添加的无关 tags——"Do not abuse our tags system for more exposure of the add-on"
+
+**Wheel 超过 200MB 限制则无法托管**
+- 如果 wheel 文件导致总包体积超过平台 200MB 限制，则无法托管含该依赖的扩展
+- 已有案例：Blendtopo 需要 cupy 作为 wheel——"If the filesize doesn't allow for shipping within our 200mb limit then unfortunately we can't host this add-on with that library"
+- 建议：对大型库提前评估体积，或考虑纯 Python 替代方案
+
+**禁止包装原生操作符（重造轮子）**
+- 不要实现仅仅调用 Blender 原生操作符的包装操作符，这只会增加不必要的开销
+- 直接让用户使用现有的原生菜单和操作符即可
+- 已有案例：VGF Vertex Group Folders 被要求移除对原生操作符的重包装——"Don't implement operators that just call native Blender operators. Simply use existing specials menu and operators"
+
+**跨平台 wheel 必须用 `--split-platforms` 构建**
+- 包含不同操作系统独立 wheel 的扩展，必须使用 `blender --command extension build --split-platforms` 构建
+- 将生成的各平台独立的 .zip 文件分别上传为独立版本
+- 确保 Linux 用户只下载自己需要的 wheel，不包含其他平台的多余文件
+- 已有案例：Rizum Clip Reload 被要求按平台拆分——"When you include libraries that have separate packages for different operating systems you need to create separate packages of the add-on as well"
+
+**禁止打包 exe/第三方运行时到扩展中**
+- 扩展中不能直接包含第三方软件的 exe 文件或其他可执行程序
+- 审核员会质疑 exe 的来源和合法性
+- 已有案例：Rizum Clip Reload 被质问——"Are you simply packing other software in this one? Using third-party software inside extensions isn't allowed"
+
+**扩展应按模块拆分为多个文件**
+- 将扩展拆分为多个文件（模块化组织），方便审核工具审查
+- 单文件大扩展不如模块化结构更容易通过审核
+- 已有案例：Missing File Rescuer——"I will appreciate it if you can organize add-on better in multiple files. Makes reviews easier for our tools"
+
+**Windows-only 扩展必须在 manifest 中限制 platforms**
+- 如果扩展使用了 Windows 特定路径、仅检查 Windows 驱动器、或调用了仅 Windows 可用的 API，必须在 `blender_manifest` 中声明 `platforms` 限制
+- 例如：`platforms = ["windows-x64"]`
+- 已有案例：Missing File Rescuer——"It seems add-on will only work on Windows because you only check for items on Windows drives. Please limit the platforms in blender_manifest"
+
+**扩展包里不要包含 logo/品牌图片**
+- 包里只保留扩展运行所必需的文件，logo、品牌图片等无关文件不应打包
+- 已有案例：MN BIM Building Code Checker——"Don't include logo in the package. Only files that are necessary for add-on to run"
+
+#### 新观察：作者对抗审核意见的处理
+
+- DMX 案例中，作者回复审核说"I am not planning to remove threading. It has been in use reliably for number of years."——这是少见的直接对抗审核意见的行为
+- 作者还要求审核员提供"exact lines"和"documentation link"来证明自己的判断
+- 这触发了 nickberckley 的一个经典回应模式：事实摆在面前（`threading`/`queue` 是 known crashers），作者仍坚持"我用了很多年都没问题"
+- 目前该扩展已被 delisted（下架），作者将状态改回 Awaiting Review 但 nickberckley 尚未继续回复
+- 启示：当审核员指出安全/规范性问题时，对抗或要求"给具体行号"通常不会改变结果，反而可能加速处理（delisted）
+
+#### 重复被指出的高频问题（本周集中出现）
+- `threading`/`queue`：DMX、PTerrain、Blendtopo——同时 3 个扩展本周因此被要求修改
+- `sys` 模块手动修改：DMX（`clean_module_imports`）、PTerrain（`_append_modules_to_sys_path`）——同时 2 个扩展被指出
+- 缺少公开 bug tracker：BoneSelector、Alert!!AutoKeyingIsOn——同时 2 个扩展被指出
+- 标签不准确：BoneSelector（`Paint` 与 Weight Painting 无关）、PTerrain（`Mesh` 应为 `Add Mesh`）、VGF（`Animation` 无关）、Missing File Rescuer（`Import-Export`/`Pipeline` 无关）
+- Report Issues 指向错误：Alert!!AutoKeyingIsOn（Gumroad）、BoneSelector（缺失）、MN BIM（公司主页而非 bug tracker）——集中出现
+- `eval`/`exec`：Coloraide、Universal Multi Importer——2 个扩展同时因此被打回
+
+#### 补充扫描：老扩展新版本回打
+
+以下是为之前已被批准的扩展，因新版本带回了违规内容而被重新下架审核的案例：
+
+**依赖/访问其他扩展不允许**
+- 扩展不能依赖、导入或访问其他扩展的内容。任何与此相关的代码都必须完全移除
+- 已有案例：Universal Multi Importer——"Depending on or accessing other extensions are not allowed. Absolutely everything related to this should be stripped out of the extension"
+
+**已批准的扩展后续版本带回违规内容仍会打回**
+- 即使某个扩展以前被 `Approved`，后续版本如果引入违规内容，照样会被下架重审
+- 已有案例：Universal Multi Importer（2024年被批准，2026年6月新版本带回 `exec`/`eval` 和依赖其他扩展的问题，被 delisted）
+- 启示：`Approved` 不代表"以后可以随意改"，每次版本更新都需遵守审核标准
+
+**禁止 OS 级别的文件访问（`screen` 等）**
+- 不要在扩展中直接访问 OS 级别的文件或设备（如 `screen` 文件），这涉及系统底层操作
+- 已有案例：Coloraide——"Remove `screen` file entirely. Do not access OS level like that"
